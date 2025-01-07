@@ -6,7 +6,7 @@ on:
       - main  # Ganti dengan nama branch utama Anda jika berbeda
 
 permissions:
-  contents: write  # Menambahkan izin tulis untuk GITHUB_TOKEN
+  contents: write  # Memberikan izin tulis untuk GITHUB_TOKEN
 
 jobs:
   build-and-deploy:
@@ -21,29 +21,39 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '18'  # Memperbarui ke Node.js versi 18
+          node-version: '18'  # Menggunakan Node.js versi 18
 
-      # Langkah 3: Install dependensi frontend
+      # Langkah 3: Cache dependencies untuk mempercepat build
+      - name: Cache node modules
+        uses: actions/cache@v3
+        with:
+          path: magang/frontend/node_modules
+          key: ${{ runner.os }}-node-${{ hashFiles('magang/frontend/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
+      # Langkah 4: Install dependensi frontend
       - name: Install Dependencies
         run: |
           cd magang/frontend
           npm install
 
-      # Langkah 4: Build frontend
+      # Langkah 5: Build frontend
       - name: Build Frontend
         run: |
           cd magang/frontend
           npm run build
 
-      # Langkah 5: Menambahkan file .nojekyll
+      # Langkah 6: Menambahkan file .nojekyll
       - name: Create .nojekyll
         run: |
           touch magang/frontend/dist/.nojekyll
 
-      # Langkah 6: Deploy ke GitHub Pages
+      # Langkah 7: Deploy ke GitHub Pages di subdirektori 'magang'
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: magang/frontend/dist
+          destination_dir: magang  # Menentukan subdirektori 'magang'
           publish_branch: gh-pages  # Menentukan branch gh-pages sebagai target
