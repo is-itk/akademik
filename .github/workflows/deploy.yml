@@ -5,6 +5,9 @@ on:
     branches:
       - main  # Ganti dengan nama branch utama Anda jika berbeda
 
+permissions:
+  contents: write  # Menambahkan izin tulis untuk GITHUB_TOKEN
+
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
