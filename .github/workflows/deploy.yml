@@ -12,13 +12,13 @@ jobs:
     steps:
       # Langkah 1: Checkout kode dari repositori
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       # Langkah 2: Setup Node.js
       - name: Setup Node.js
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v3
         with:
-          node-version: '16'  # Sesuaikan dengan versi Node.js yang Anda gunakan
+          node-version: '18'  # Memperbarui ke Node.js versi 18
 
       # Langkah 3: Install dependensi frontend
       - name: Install Dependencies
@@ -32,10 +32,15 @@ jobs:
           cd magang/frontend
           npm run build
 
-      # Langkah 5: Deploy ke GitHub Pages
+      # Langkah 5: Menambahkan file .nojekyll
+      - name: Create .nojekyll
+        run: |
+          touch magang/frontend/dist/.nojekyll
+
+      # Langkah 6: Deploy ke GitHub Pages
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: magang/frontend/dist
-          # Optional: Tambahkan konfigurasi lain jika diperlukan
+          publish_branch: gh-pages  # Menentukan branch gh-pages sebagai target
