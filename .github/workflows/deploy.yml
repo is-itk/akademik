@@ -1,0 +1,41 @@
+name: Deploy Frontend to GitHub Pages
+
+on:
+  push:
+    branches:
+      - main  # Ganti dengan nama branch utama Anda jika berbeda
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Langkah 1: Checkout kode dari repositori
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      # Langkah 2: Setup Node.js
+      - name: Setup Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '16'  # Sesuaikan dengan versi Node.js yang Anda gunakan
+
+      # Langkah 3: Install dependensi frontend
+      - name: Install Dependencies
+        run: |
+          cd magang/frontend
+          npm install
+
+      # Langkah 4: Build frontend
+      - name: Build Frontend
+        run: |
+          cd magang/frontend
+          npm run build
+
+      # Langkah 5: Deploy ke GitHub Pages
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: magang/frontend/dist
+          # Optional: Tambahkan konfigurasi lain jika diperlukan
