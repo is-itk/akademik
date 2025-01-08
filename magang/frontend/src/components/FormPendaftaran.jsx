@@ -4,46 +4,79 @@ import { supabase } from "../lib/supabase";
 
 const FormPendaftaran = () => {
   const [nama, setNama] = useState("");
-  const [nim, setNim] = useState("");
+  const [prodiCode, setProdiCode] = useState("");
   const [angkatan, setAngkatan] = useState("");
-  const [motivasi, setMotivasi] = useState("");
-  const [rencana, setRencana] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
 
-    const { data, error } = await supabase
-      .from("magang_registrations")
-      .insert([
-        {
-          nama,
-          nim,
-          angkatan,
-          motivasi,
-          rencana_kegiatan: rencana,
-        },
-      ]);
+    // Pendaftaran user dengan email dan password
+    const { user, error: signUpError } = await supabase.auth.signUp({
+      email,
+      password,
+    });
 
-    setLoading(false);
-
-    if (error) {
-      console.error(error);
+    if (signUpError) {
+      console.error(signUpError);
       alert("Gagal mendaftar magang");
-    } else {
-      alert("Berhasil mendaftar magang");
-      // Reset form
-      setNama("");
-      setNim("");
-      setAngkatan("");
-      setMotivasi("");
-      setRencana("");
+      setLoading(false);
+      return;
     }
+
+    // Update tabel profiles dengan informasi tambahan
+    const { error: updateError } = await supabase
+      .from("profiles")
+      .update({
+        nama,
+        prodi_code: prodiCode,
+        angkatan,
+        role: "student", // Role default
+      })
+      .eq("id", user.id);
+
+    if (updateError) {
+      console.error(updateError);
+      alert("Gagal mengisi profil");
+      setLoading(false);
+      return;
+    }
+
+    alert("Berhasil mendaftar magang. Silakan verifikasi email Anda.");
+    // Reset form
+    setNama("");
+    setProdiCode("");
+    setAngkatan("");
+    setEmail("");
+    setPassword("");
+    setLoading(false);
   };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
+      <div>
+        <label className="block mb-1">Email</label>
+        <input
+          type="email"
+          className="border p-2 w-full"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          required
+        />
+      </div>
+      <div>
+        <label className="block mb-1">Password</label>
+        <input
+          type="password"
+          className="border p-2 w-full"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          required
+        />
+      </div>
       <div>
         <label className="block mb-1">Nama</label>
         <input
@@ -55,45 +88,27 @@ const FormPendaftaran = () => {
         />
       </div>
       <div>
-        <label className="block mb-1">NIM</label>
+        <label className="block mb-1">Prodi Code</label>
         <input
           type="text"
           className="border p-2 w-full"
-          value={nim}
-          onChange={(e) => setNim(e.target.value)}
+          value={prodiCode}
+          onChange={(e) => setProdiCode(e.target.value)}
           required
+          pattern="\d{2}" // Contoh: dua digit kode prodi
+          title="Masukkan 2 digit kode prodi"
         />
       </div>
       <div>
         <label className="block mb-1">Angkatan</label>
-        <select
+        <input
+          type="number"
           className="border p-2 w-full"
           value={angkatan}
-          onChange={(e) => setAngkatan(e.target.value)}
+          onChange={(e) => setAngkatan(parseInt(e.target.value))}
           required
-        >
-          <option value="">Pilih Angkatan</option>
-          <option value="2019">2019</option>
-          <option value="2020">2020</option>
-          <option value="2021">2021</option>
-        </select>
-      </div>
-      <div>
-        <label className="block mb-1">Motivasi</label>
-        <textarea
-          className="border p-2 w-full"
-          value={motivasi}
-          onChange={(e) => setMotivasi(e.target.value)}
-          required
-        />
-      </div>
-      <div>
-        <label className="block mb-1">Rencana Kegiatan</label>
-        <textarea
-          className="border p-2 w-full"
-          value={rencana}
-          onChange={(e) => setRencana(e.target.value)}
-          required
+          min="2000"
+          max="2100"
         />
       </div>
       <button

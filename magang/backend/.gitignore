@@ -1,0 +1,3 @@
+# magang/backend/.gitignore
+.env
+.vercel
